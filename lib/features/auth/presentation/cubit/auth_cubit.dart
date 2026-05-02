@@ -15,7 +15,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       final response = await _authRepository.login(LoginRequest(email: email, password: password));
-      await _secureStorage.writeToken(response.token!);
+      await _secureStorage.writeToken(response.token);
       await _secureStorage.writeUserId(response.userId);
       await _secureStorage.writeRole(response.role);
       emit(AuthSuccess(response));
