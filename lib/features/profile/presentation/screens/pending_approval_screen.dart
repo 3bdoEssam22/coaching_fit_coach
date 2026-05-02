@@ -39,18 +39,17 @@ class PendingApprovalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 48),
               _buildStatusTracker(),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/'),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Check Status'),
+              const SizedBox(height: 48),
+              ElevatedButton(
+                onPressed: () => context.go('/view-profile'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
+                child: Text('Check My Status', style: AppTextStyles.button),
               ),
-              const Spacer(),
+              const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
                   context.read<AuthCubit>().logout();

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
+import 'package:coaching_fit_coach/service_locator.dart';
 
 class ViewProfileScreen extends StatefulWidget {
   const ViewProfileScreen({super.key});
@@ -15,10 +17,16 @@ class ViewProfileScreen extends StatefulWidget {
 }
 
 class _ViewProfileScreenState extends State<ViewProfileScreen> {
+  String _fullName = 'Coach';
+
   @override
   void initState() {
     super.initState();
     context.read<ProfileCubit>().getMyProfile();
+    sl<SecureStorage>().readToken().then((_) {
+      // fullName was stored on login — read it if available
+      // For now show a placeholder
+    });
   }
 
   @override
@@ -42,13 +50,14 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary)));
           } else if (state is ProfileSuccess) {
             final profile = state.profile;
-            final user = state.user;
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  if (!profile.isActive) _buildPendingBanner(),
-                  _buildHeroCard(profile, user),
+                  // TODO: Only show when isActive=false once backend
+                  // returns isActive in CoachProfileResponse
+                  _buildPendingBanner(),
+                  _buildHeroCard(profile),
                   const SizedBox(height: 24),
                   _buildAboutCard(profile.bio),
                   const SizedBox(height: 24),
@@ -90,7 +99,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildHeroCard(dynamic profile, dynamic user) {
+  Widget _buildHeroCard(dynamic profile) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -105,11 +114,14 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             backgroundColor: AppColors.primary,
             backgroundImage: profile.profilePhotoUrl != null ? NetworkImage(profile.profilePhotoUrl!) : null,
             child: profile.profilePhotoUrl == null
-                ? Text(user.name.split(' ').map((e) => e[0]).take(2).join(), style: AppTextStyles.heading1.copyWith(color: Colors.white))
+                ? Text(
+                    profile.userId.isNotEmpty ? profile.userId[0].toUpperCase() : 'C',
+                    style: AppTextStyles.heading1.copyWith(color: Colors.white),
+                  )
                 : null,
           ),
           const SizedBox(height: 16),
-          Text(user.name, style: AppTextStyles.heading2),
+          Text(_fullName, style: AppTextStyles.heading2),
           const SizedBox(height: 8),
           Chip(
             label: Text('Coach', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),

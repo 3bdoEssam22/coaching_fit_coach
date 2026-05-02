@@ -34,31 +34,25 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // Token exists, check profile
+    final profileRepository = sl<ProfileRepository>();
     try {
-      final profileRepository = sl<ProfileRepository>();
-      final profile = await profileRepository.getMyProfile();
+      await profileRepository.getMyProfile();
       await secureStorage.writeHasProfile(true);
-      await secureStorage.writeRole(profile.role);
-
       if (mounted) {
-        if (profile.isActive) {
-          context.go('/view-profile');
-        } else {
-          context.go('/pending-approval');
-        }
+        // TODO: A proper isActive check requires either:
+        // a) Backend to include isActive in the profile response (backend change needed), OR
+        // b) Calling GET /api/Auth/me which returns the user with IsActive.
+        // For now, always route to /pending-approval and let the coach tap "Check Status"
+        // to go to /view-profile.
+        context.go('/pending-approval');
       }
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 404) {
         await secureStorage.writeHasProfile(false);
-        if (mounted) {
-          context.go('/create-profile');
-        }
+        if (mounted) context.go('/create-profile');
       } else {
-        // Handle other errors, maybe logout and go to login
         await secureStorage.clearAll();
-        if (mounted) {
-          context.go('/login');
-        }
+        if (mounted) context.go('/login');
       }
     }
   }
