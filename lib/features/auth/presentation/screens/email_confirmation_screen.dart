@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:coaching_fit_coach/core/theme/app_colors.dart';
+import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

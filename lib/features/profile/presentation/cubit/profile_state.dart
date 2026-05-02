@@ -1,4 +1,5 @@
 import 'package:coaching_fit_coach/features/profile/data/models/coach_profile_response.dart';
+import 'package:coaching_fit_coach/features/profile/data/models/user_response.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class ProfileState extends Equatable {
@@ -14,11 +15,12 @@ class ProfileLoading extends ProfileState {}
 
 class ProfileSuccess extends ProfileState {
   final CoachProfileResponse profile;
+  final UserResponse user;
 
-  const ProfileSuccess(this.profile);
+  const ProfileSuccess(this.profile, this.user);
 
   @override
-  List<Object?> get props => [profile];
+  List<Object?> get props => [profile, user];
 }
 
 class ProfileFailure extends ProfileState {

@@ -1,10 +1,12 @@
-import 'package:coaching_fit_coach/core/theme/app_colors.dart';
+import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:coaching_fit_coach/service_locator.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,7 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            context.go('/create-profile');
+            sl<SecureStorage>().readHasProfile().then((hasProfile) {
+              if (!context.mounted) return;
+              context.go(hasProfile ? '/view-profile' : '/create-profile');
+            });
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

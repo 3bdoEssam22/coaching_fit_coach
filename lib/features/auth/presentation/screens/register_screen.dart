@@ -1,4 +1,4 @@
-import 'package:coaching_fit_coach/core/theme/app_colors.dart';
+import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/auth/data/models/register_request.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';

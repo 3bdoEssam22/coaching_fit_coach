@@ -77,7 +77,7 @@ class AppRouter {
   if (role == 'Coach') {
     // SplashScreen will determine IsActive and navigate accordingly
     // Router just blocks auth screens when logged in
-    if (path == '/login' || path == '/register') return '/home';
+    if (path == '/login' || path == '/register') return '/view-profile';
   }
 
   return null;

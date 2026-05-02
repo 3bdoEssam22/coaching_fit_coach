@@ -4,6 +4,7 @@ import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/network/dio_client.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/coach_profile_response.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
+import 'package:coaching_fit_coach/features/profile/data/models/user_response.dart';
 import 'package:dio/dio.dart';
 
 abstract class ProfileRepository {
@@ -11,6 +12,7 @@ abstract class ProfileRepository {
   Future<CoachProfileResponse> getMyProfile();
   Future<CoachProfileResponse> getProfileById(String id);
   Future<void> updateProfile({String? bio, int? experienceYears, File? photo});
+  Future<UserResponse> getUser();
 }
 
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -38,6 +40,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       final response = await _dioClient.dio.get(ApiConstants.getMyProfile);
       return CoachProfileResponse.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw NotFoundFailure('Profile not found');
+      }
+      throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
+    }
+  }
+
+  @override
+  Future<UserResponse> getUser() async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.getMe);
+      return UserResponse.fromJson(response.data['data']);
     } on DioException catch (e) {
       throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
     }

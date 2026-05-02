@@ -1,5 +1,5 @@
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
-import 'package:coaching_fit_coach/core/theme/app_colors.dart';
+import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
 import 'package:coaching_fit_coach/service_locator.dart';
@@ -38,9 +38,14 @@ class _SplashScreenState extends State<SplashScreen> {
       final profileRepository = sl<ProfileRepository>();
       final profile = await profileRepository.getMyProfile();
       await secureStorage.writeHasProfile(true);
-      // TODO: Check isActive from profile and store it
+      await secureStorage.writeRole(profile.role);
+
       if (mounted) {
-        context.go('/view-profile');
+        if (profile.isActive) {
+          context.go('/view-profile');
+        } else {
+          context.go('/pending-approval');
+        }
       }
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 404) {

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:coaching_fit_coach/core/theme/app_colors.dart';
+import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
