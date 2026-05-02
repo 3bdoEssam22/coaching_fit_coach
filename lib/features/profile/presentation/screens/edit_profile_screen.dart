@@ -76,7 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           } else if (state is ProfileFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.error),
+                content: Text(state.message),
                 backgroundColor: AppColors.error,
               ),
             );

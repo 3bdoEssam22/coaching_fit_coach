@@ -57,7 +57,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
               ),
             );
           } else if (state is ProfileFailure) {
-            return Center(child: Text(state.error, style: AppTextStyles.bodyL.copyWith(color: AppColors.error)));
+            return Center(child: Text(state.message, style: AppTextStyles.bodyL.copyWith(color: AppColors.error)));
           }
           return const Center(child: Text('No profile data'));
         },

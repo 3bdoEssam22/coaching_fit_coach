@@ -10,6 +10,8 @@ class CoachProfileResponse {
   final String bio;
   final int experienceYears;
   final String? profilePhotoUrl;
+  final bool isActive;
+  final String role;
   final DateTime createdAt;
 
   CoachProfileResponse({
@@ -19,6 +21,8 @@ class CoachProfileResponse {
     required this.bio,
     required this.experienceYears,
     this.profilePhotoUrl,
+    required this.isActive,
+    required this.role,
     required this.createdAt,
   });
 

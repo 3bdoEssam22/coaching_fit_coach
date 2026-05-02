@@ -56,7 +56,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
             } else if (state is ProfileFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.error),
+                  content: Text(state.message),
                   backgroundColor: AppColors.error,
                 ),
               );
