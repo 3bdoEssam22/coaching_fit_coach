@@ -13,7 +13,7 @@ CoachProfileResponse _$CoachProfileResponseFromJson(
       userId: json['userId'] as String,
       gender: json['gender'] as String,
       bio: json['bio'] as String,
-      experienceYears: (json['experienceYears'] as num).toInt(),
+      experienceYears: _experienceYearsFromJson(json['experienceYears']),
       profilePhotoUrl: json['profilePhotoUrl'] as String?,
       isActive: json['isActive'] as bool,
       role: json['role'] as String,

@@ -2,25 +2,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'auth_response.g.dart';
 
+String _stringFromJson(dynamic json) => json.toString();
+
 @JsonSerializable()
 class AuthResponse {
-  final String userId;
-  final String email;
-  final String fullName;
+  @JsonKey(fromJson: _stringFromJson)
+  final String token;
+  @JsonKey(fromJson: _stringFromJson)
   final String role;
-  final String? token;        // null on register, present on login
-  final DateTime? expiresAt;  // null on register
+  @JsonKey(fromJson: _stringFromJson)
+  final String userId;
 
-  AuthResponse({
-    required this.userId,
-    required this.email,
-    required this.fullName,
-    required this.role,
-    this.token,
-    this.expiresAt,
-  });
+  AuthResponse({required this.token, required this.role, required this.userId});
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) => _$AuthResponseFromJson(json);
+  factory AuthResponse.fromJson(Map<String, dynamic> json) =>
+      _$AuthResponseFromJson(json);
   Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 }
 

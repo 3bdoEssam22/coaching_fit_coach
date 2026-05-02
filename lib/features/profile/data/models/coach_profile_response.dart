@@ -2,12 +2,23 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'coach_profile_response.g.dart';
 
+int _experienceYearsFromJson(dynamic json) {
+  if (json is int) {
+    return json;
+  }
+  if (json is String) {
+    return int.tryParse(json) ?? 0;
+  }
+  return 0;
+}
+
 @JsonSerializable()
 class CoachProfileResponse {
   final String id;
   final String userId;
   final String gender;
   final String bio;
+  @JsonKey(fromJson: _experienceYearsFromJson)
   final int experienceYears;
   final String? profilePhotoUrl;
   final bool isActive;
