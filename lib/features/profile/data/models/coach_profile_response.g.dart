@@ -14,8 +14,8 @@ CoachProfileResponse _$CoachProfileResponseFromJson(
       gender: json['gender'] as String,
       bio: json['bio'] as String,
       experienceYears: (json['experienceYears'] as num).toInt(),
-      photoUrl: json['photoUrl'] as String?,
-      isActive: json['isActive'] as bool,
+      profilePhotoUrl: json['profilePhotoUrl'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
 Map<String, dynamic> _$CoachProfileResponseToJson(
@@ -26,6 +26,6 @@ Map<String, dynamic> _$CoachProfileResponseToJson(
       'gender': instance.gender,
       'bio': instance.bio,
       'experienceYears': instance.experienceYears,
-      'photoUrl': instance.photoUrl,
-      'isActive': instance.isActive,
+      'profilePhotoUrl': instance.profilePhotoUrl,
+      'createdAt': instance.createdAt.toIso8601String(),
     };

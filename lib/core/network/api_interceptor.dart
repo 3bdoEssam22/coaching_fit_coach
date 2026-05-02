@@ -20,7 +20,7 @@ class ApiInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      await _secureStorage.deleteToken();
+      await _secureStorage.clearAll();
       _router.go('/login');
     }
     return super.onError(err, handler);

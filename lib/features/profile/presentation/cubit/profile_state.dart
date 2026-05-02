@@ -22,12 +22,12 @@ class ProfileSuccess extends ProfileState {
 }
 
 class ProfileFailure extends ProfileState {
-  final String message;
+  final String error;
 
-  const ProfileFailure(this.message);
+  const ProfileFailure(this.error);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [error];
 }
 
 class ProfileCreated extends ProfileState {}

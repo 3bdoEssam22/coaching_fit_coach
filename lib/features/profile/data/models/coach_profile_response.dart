@@ -9,8 +9,8 @@ class CoachProfileResponse {
   final String gender;
   final String bio;
   final int experienceYears;
-  final String? photoUrl;
-  final bool isActive;
+  final String? profilePhotoUrl;
+  final DateTime createdAt;
 
   CoachProfileResponse({
     required this.id,
@@ -18,8 +18,8 @@ class CoachProfileResponse {
     required this.gender,
     required this.bio,
     required this.experienceYears,
-    this.photoUrl,
-    required this.isActive,
+    this.profilePhotoUrl,
+    required this.createdAt,
   });
 
   factory CoachProfileResponse.fromJson(Map<String, dynamic> json) => _$CoachProfileResponseFromJson(json);

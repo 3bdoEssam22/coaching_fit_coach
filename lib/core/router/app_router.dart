@@ -6,8 +6,9 @@ import 'package:coaching_fit_coach/features/auth/presentation/screens/splash_scr
 import 'package:coaching_fit_coach/features/profile/presentation/screens/create_profile_screen.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/screens/pending_approval_screen.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/screens/view_profile_screen.dart';
-import 'package:flutter/material.dart';
+
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -20,6 +21,10 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: '/login',
@@ -50,18 +55,32 @@ class AppRouter {
         builder: (context, state) => const EditProfileScreen(),
       ),
     ],
-    redirect: (BuildContext context, GoRouterState state) async {
-      final token = await _secureStorage.readToken();
-      final loggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+    redirect: (context, state) async {
+  final token = await _secureStorage.readToken();
+  final path = state.matchedLocation;
 
-      if (token == null) {
-        return loggingIn ? null : '/login';
-      }
+  // Not logged in
+  if (token == null) {
+    if (path == '/login' || path == '/register' || path == '/email-confirmation') return null;
+    return '/login';
+  }
 
-      // TODO: Add logic for profile check and IsActive check
-      if (loggingIn) return '/';
+  // Logged in — check profile
+  final hasProfile = await _secureStorage.readHasProfile();
+  if (!hasProfile) {
+    if (path == '/create-profile') return null;
+    return '/create-profile';
+  }
 
-      return null;
-    },
+  // Has profile — check IsActive (stored in secure storage after profile fetch)
+  final role = await _secureStorage.readRole();
+  if (role == 'Coach') {
+    // SplashScreen will determine IsActive and navigate accordingly
+    // Router just blocks auth screens when logged in
+    if (path == '/login' || path == '/register') return '/home';
+  }
+
+  return null;
+},
   );
 }

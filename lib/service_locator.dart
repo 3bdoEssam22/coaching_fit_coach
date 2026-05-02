@@ -14,20 +14,24 @@ import 'package:go_router/go_router.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // Core
-  sl.registerLazySingleton(() => Dio());
+  // 1. Storage
   sl.registerLazySingleton(() => const FlutterSecureStorage());
   sl.registerLazySingleton(() => SecureStorage(sl()));
-  sl.registerLazySingleton(() => AppRouter(sl()));
-  sl.registerLazySingleton(() => sl<AppRouter>().router);
-  sl.registerLazySingleton(() => ApiInterceptor(sl(), sl<GoRouter>()));
-  sl.registerLazySingleton(() => DioClient(sl(), sl()));
 
-  // Repositories
+  // 2. Router (depends on SecureStorage only)
+  sl.registerLazySingleton(() => AppRouter(sl()));
+  sl.registerLazySingleton<GoRouter>(() => sl<AppRouter>().router);
+
+  // 3. Network (depends on SecureStorage + GoRouter)
+  sl.registerLazySingleton(() => ApiInterceptor(sl<SecureStorage>(), sl<GoRouter>()));
+  sl.registerLazySingleton(() => Dio());
+  sl.registerLazySingleton(() => DioClient(sl<Dio>(), sl<ApiInterceptor>()));
+
+  // 4. Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
   sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(sl()));
 
-  // Cubits
-  sl.registerFactory(() => AuthCubit(sl()));
+  // 5. Cubits
+  sl.registerFactory(() => AuthCubit(sl(), sl<SecureStorage>()));
   sl.registerFactory(() => ProfileCubit(sl()));
 }

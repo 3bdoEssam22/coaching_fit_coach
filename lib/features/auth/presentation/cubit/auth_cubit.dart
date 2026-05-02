@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/auth/data/models/login_request.dart';
 import 'package:coaching_fit_coach/features/auth/data/models/register_request.dart';
 import 'package:coaching_fit_coach/features/auth/data/repositories/auth_repository.dart';
@@ -6,13 +7,17 @@ import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_state.d
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
+  final SecureStorage _secureStorage;
 
-  AuthCubit(this._authRepository) : super(AuthInitial());
+  AuthCubit(this._authRepository, this._secureStorage) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
     emit(AuthLoading());
     try {
       final response = await _authRepository.login(LoginRequest(email: email, password: password));
+      await _secureStorage.writeToken(response.token!);
+      await _secureStorage.writeUserId(response.userId);
+      await _secureStorage.writeRole(response.role);
       emit(AuthSuccess(response));
     } catch (e) {
       emit(AuthFailure(e.toString()));
@@ -27,5 +32,10 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
+  }
+
+  Future<void> logout() async {
+    await _secureStorage.clearAll();
+    emit(AuthInitial());
   }
 }
