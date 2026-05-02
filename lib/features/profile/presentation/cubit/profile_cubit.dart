@@ -23,7 +23,8 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileLoading());
     try {
       final profile = await _profileRepository.getMyProfile();
-      emit(ProfileSuccess(profile));
+      final user = await _profileRepository.getUser();
+      emit(ProfileSuccess(profile, user));
     } catch (e) {
       emit(ProfileFailure(e.toString()));
     }

@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
+import 'package:coaching_fit_coach/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -48,7 +50,9 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         body: BlocConsumer<ProfileCubit, ProfileState>(
           listener: (context, state) {
             if (state is ProfileCreated) {
-              context.go('/pending-approval');
+              sl<SecureStorage>().writeHasProfile(true).then((_) {
+                if (mounted) context.go('/pending-approval');
+              });
             } else if (state is ProfileFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

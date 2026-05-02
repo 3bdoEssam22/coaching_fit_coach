@@ -42,12 +42,13 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary)));
           } else if (state is ProfileSuccess) {
             final profile = state.profile;
+            final user = state.user;
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // if (!profile.isActive) _buildPendingBanner(),
-                  _buildHeroCard(profile),
+                  if (!profile.isActive) _buildPendingBanner(),
+                  _buildHeroCard(profile, user),
                   const SizedBox(height: 24),
                   _buildAboutCard(profile.bio),
                   const SizedBox(height: 24),
@@ -89,7 +90,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildHeroCard(dynamic profile) {
+  Widget _buildHeroCard(dynamic profile, dynamic user) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -104,11 +105,11 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             backgroundColor: AppColors.primary,
             backgroundImage: profile.profilePhotoUrl != null ? NetworkImage(profile.profilePhotoUrl!) : null,
             child: profile.profilePhotoUrl == null
-                ? Text('AB', style: AppTextStyles.heading1.copyWith(color: Colors.white)) // Placeholder
+                ? Text(user.name.split(' ').map((e) => e[0]).take(2).join(), style: AppTextStyles.heading1.copyWith(color: Colors.white))
                 : null,
           ),
           const SizedBox(height: 16),
-          Text("Abdulrhman Mostafa", style: AppTextStyles.heading2), // Placeholder
+          Text(user.name, style: AppTextStyles.heading2),
           const SizedBox(height: 8),
           Chip(
             label: Text('Coach', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
