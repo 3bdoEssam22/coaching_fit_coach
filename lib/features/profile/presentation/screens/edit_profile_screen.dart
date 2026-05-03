@@ -179,7 +179,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.card.withOpacity(0.5),
+                color: const Color(0x80162240),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.borderColor),
               ),

@@ -10,6 +10,8 @@ AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) => AuthResponse(
       token: _stringFromJson(json['token']),
       role: _stringFromJson(json['role']),
       userId: _stringFromJson(json['userId']),
+      fullName: _stringFromJson(json['fullName']),
+      isActive: json['isActive'] as bool,
     );
 
 Map<String, dynamic> _$AuthResponseToJson(AuthResponse instance) =>
@@ -17,4 +19,6 @@ Map<String, dynamic> _$AuthResponseToJson(AuthResponse instance) =>
       'token': instance.token,
       'role': instance.role,
       'userId': instance.userId,
+      'fullName': instance.fullName,
+      'isActive': instance.isActive,
     };

@@ -18,14 +18,17 @@ class ViewProfileScreen extends StatefulWidget {
 
 class _ViewProfileScreenState extends State<ViewProfileScreen> {
   String _fullName = 'Coach';
+  bool _isActive = true;
 
   @override
   void initState() {
     super.initState();
     context.read<ProfileCubit>().getMyProfile();
-    sl<SecureStorage>().readToken().then((_) {
-      // fullName was stored on login — read it if available
-      // For now show a placeholder
+    sl<SecureStorage>().readFullName().then((name) {
+      if (mounted) setState(() => _fullName = name ?? 'Coach');
+    });
+    sl<SecureStorage>().readIsActive().then((isActive) {
+      if (mounted) setState(() => _isActive = isActive);
     });
   }
 
@@ -54,9 +57,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // TODO: Only show when isActive=false once backend
-                  // returns isActive in CoachProfileResponse
-                  _buildPendingBanner(),
+                  if (!_isActive) _buildPendingBanner(),
                   _buildHeroCard(profile),
                   const SizedBox(height: 24),
                   _buildAboutCard(profile.bio),
@@ -80,7 +81,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.amber.withOpacity(0.2),
+        color: const Color(0x33FFC107),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.amber),
       ),
@@ -115,7 +116,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             backgroundImage: profile.profilePhotoUrl != null ? NetworkImage(profile.profilePhotoUrl!) : null,
             child: profile.profilePhotoUrl == null
                 ? Text(
-                    profile.userId.isNotEmpty ? profile.userId[0].toUpperCase() : 'C',
+                    _fullName.isNotEmpty ? _fullName[0].toUpperCase() : 'C',
                     style: AppTextStyles.heading1.copyWith(color: Colors.white),
                   )
                 : null,
@@ -125,7 +126,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
           const SizedBox(height: 8),
           Chip(
             label: Text('Coach', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: const Color(0x191A73E8),
             side: BorderSide.none,
           ),
           const SizedBox(height: 20),

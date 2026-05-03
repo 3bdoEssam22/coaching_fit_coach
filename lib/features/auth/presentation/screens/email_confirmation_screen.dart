@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/features/auth/data/repositories/auth_repository.dart';
+import 'package:coaching_fit_coach/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,23 +25,34 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
     super.dispose();
   }
 
-  void _startCooldown() {
-    setState(() {
-      _isResendButtonDisabled = true;
-    });
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_cooldown == 0) {
-        timer.cancel();
-        setState(() {
-          _isResendButtonDisabled = false;
-          _cooldown = 60;
-        });
-      } else {
-        setState(() {
-          _cooldown--;
-        });
+  void _startCooldown(String? email) async {
+    if (email == null) return;
+
+    try {
+      await sl<AuthRepository>().resendConfirmation(email);
+      setState(() {
+        _isResendButtonDisabled = true;
+      });
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_cooldown == 0) {
+          timer.cancel();
+          setState(() {
+            _isResendButtonDisabled = false;
+            _cooldown = 60;
+          });
+        } else {
+          setState(() {
+            _cooldown--;
+          });
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+        );
       }
-    });
+    }
   }
 
   @override
@@ -73,7 +86,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
               ),
               const SizedBox(height: 48),
               OutlinedButton(
-                onPressed: _isResendButtonDisabled ? null : _startCooldown,
+                onPressed: _isResendButtonDisabled ? null : () => _startCooldown(email),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.primary),
                   minimumSize: const Size(double.infinity, 52),

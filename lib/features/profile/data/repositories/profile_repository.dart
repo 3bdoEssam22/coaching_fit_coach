@@ -40,7 +40,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return CoachProfileResponse.fromJson(response.data['data']);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw NotFoundFailure('Profile not found');
+        throw const NotFoundFailure('Profile not found');
       }
       throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
     }

@@ -6,6 +6,8 @@ class SecureStorage {
   static const _userIdKey = 'user_id';
   static const _roleKey = 'role';
   static const _hasProfileKey = 'has_profile';
+  static const _isActiveKey = 'is_active';
+  static const _fullNameKey = 'full_name';
 
   SecureStorage(this._storage);
 
@@ -40,6 +42,23 @@ class SecureStorage {
   Future<bool> readHasProfile() async {
     final value = await _storage.read(key: _hasProfileKey);
     return value == 'true';
+  }
+
+  Future<void> writeIsActive(bool isActive) async {
+    await _storage.write(key: _isActiveKey, value: isActive.toString());
+  }
+
+  Future<bool> readIsActive() async {
+    final value = await _storage.read(key: _isActiveKey);
+    return value == 'true';
+  }
+
+  Future<void> writeFullName(String fullName) async {
+    await _storage.write(key: _fullNameKey, value: fullName);
+  }
+
+  Future<String?> readFullName() async {
+    return await _storage.read(key: _fullNameKey);
   }
 
   Future<void> clearAll() async {

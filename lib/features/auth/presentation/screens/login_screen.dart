@@ -3,6 +3,8 @@ import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_state.dart';
+import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
+import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -33,12 +35,21 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AuthSuccess) {
-            sl<SecureStorage>().readHasProfile().then((hasProfile) {
-              if (!context.mounted) return;
-              context.go(hasProfile ? '/view-profile' : '/create-profile');
-            });
+            final profileRepository = sl<ProfileRepository>();
+            try {
+              await profileRepository.getMyProfile();
+              await sl<SecureStorage>().writeHasProfile(true);
+              if (context.mounted) context.go('/pending-approval');
+            } catch (e) {
+              if (e is NotFoundFailure) {
+                await sl<SecureStorage>().writeHasProfile(false);
+                if (context.mounted) context.go('/create-profile');
+              } else {
+                if (context.mounted) context.go('/create-profile');
+              }
+            }
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
