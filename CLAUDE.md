@@ -216,23 +216,6 @@ flutter build apk --debug
 
 ---
 
-## ⚠️ Known Backend Gap (Blocks Login E2E)
-The Flutter `AuthResponse` expects `isActive`, but the backend's `AuthResponse.cs` does **not** return it yet. Without the fix, the generated code throws on a null cast.
-
-**Backend must:**
-1. Add `public bool IsActive { get; set; }` to `AuthResponse.cs`
-2. Populate it in `AuthService` for all four paths:
-   - `RegisterCoachAsync` → `false`
-   - `RegisterTraineeAsync` → `true`
-   - `LoginAsync` → `user.IsActive`
-   - `GetCurrentUserAsync` → `user.IsActive`
-
-**Flutter workaround until then:**
-```dart
-// auth_response.g.dart
-isActive: json['isActive'] as bool? ?? false,
-```
-
 ---
 
 ## Conventions
