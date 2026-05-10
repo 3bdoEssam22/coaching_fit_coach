@@ -56,8 +56,12 @@ class AppRouter {
       ),
     ],
     redirect: (context, state) async {
-  final token = await _secureStorage.readToken();
   final path = state.matchedLocation;
+
+  // Splash always runs — it has its own routing logic
+  if (path == '/') return null;
+
+  final token = await _secureStorage.readToken();
 
   // Not logged in
   if (token == null) {
@@ -72,12 +76,9 @@ class AppRouter {
     return '/create-profile';
   }
 
-  // Has profile — check IsActive (stored in secure storage after profile fetch)
-  final role = await _secureStorage.readRole();
-  if (role == 'Coach') {
-    // SplashScreen will determine IsActive and navigate accordingly
-    // Router just blocks auth screens when logged in
-    if (path == '/login' || path == '/register') return '/view-profile';
+  // Has profile and on auth screen — bounce to view-profile
+  if (path == '/login' || path == '/register' || path == '/email-confirmation') {
+    return '/view-profile';
   }
 
   return null;

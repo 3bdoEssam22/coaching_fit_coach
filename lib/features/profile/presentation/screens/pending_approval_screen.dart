@@ -51,9 +51,9 @@ class PendingApprovalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: () {
-                  context.read<AuthCubit>().logout();
-                  context.go('/login');
+                onPressed: () async {
+                  await context.read<AuthCubit>().logout();
+                  if (context.mounted) context.go('/login');
                 },
                 child: Text(
                   'Log Out',

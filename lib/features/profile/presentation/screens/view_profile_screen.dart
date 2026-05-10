@@ -72,7 +72,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
           return const Center(child: Text('No profile data'));
         },
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: null,
     );
   }
 
@@ -209,18 +209,4 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      backgroundColor: AppColors.surface,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.textHint,
-      currentIndex: 1, // Profile is active
-      type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble), label: 'Chat'),
-      ],
-    );
-  }
 }

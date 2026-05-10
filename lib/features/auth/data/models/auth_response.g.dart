@@ -11,7 +11,7 @@ AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) => AuthResponse(
       role: _stringFromJson(json['role']),
       userId: _stringFromJson(json['userId']),
       fullName: _stringFromJson(json['fullName']),
-      isActive: json['isActive'] as bool,
+      isActive: json['isActive'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$AuthResponseToJson(AuthResponse instance) =>

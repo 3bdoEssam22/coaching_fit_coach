@@ -107,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _phoneController,
-                    decoration: _inputDecoration('Phone Number').copyWith(prefixText: '🇪🇬 +20 '),
+                    decoration: _inputDecoration('Phone Number (01XXXXXXXXX)'),
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Please enter your phone number';
                       if (!RegExp(r'^01[0125][0-9]{8}$').hasMatch(value)) return 'Enter a valid Egyptian number';
@@ -199,7 +199,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         email: _emailController.text.trim(),
-        phoneNumber: '+20${_phoneController.text.trim()}',
+        phoneNumber: _phoneController.text.trim(),
         password: _passwordController.text.trim(),
         confirmPassword: _confirmPasswordController.text.trim(),
       );

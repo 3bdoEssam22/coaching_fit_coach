@@ -41,13 +41,23 @@ class _LoginScreenState extends State<LoginScreen> {
             try {
               await profileRepository.getMyProfile();
               await sl<SecureStorage>().writeHasProfile(true);
-              if (context.mounted) context.go('/pending-approval');
+              final isActive = await sl<SecureStorage>().readIsActive();
+              if (context.mounted) {
+                context.go(isActive ? '/view-profile' : '/pending-approval');
+              }
             } catch (e) {
               if (e is NotFoundFailure) {
                 await sl<SecureStorage>().writeHasProfile(false);
                 if (context.mounted) context.go('/create-profile');
               } else {
-                if (context.mounted) context.go('/create-profile');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not load profile. Please try again.'),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
+                }
               }
             }
           } else if (state is AuthFailure) {
@@ -99,7 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Forgot password feature coming soon.')),
+                        );
+                      },
                       child: Text('Forgot Password?', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
                     ),
                   ),

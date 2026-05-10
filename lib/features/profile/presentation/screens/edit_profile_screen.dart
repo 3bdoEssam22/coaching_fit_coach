@@ -71,8 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is ProfileUpdated) {
-            context.read<ProfileCubit>().getMyProfile();
-            context.pop();
+            context.pop(); // ViewProfileScreen.initState() will refetch
           } else if (state is ProfileFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

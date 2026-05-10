@@ -21,7 +21,7 @@ class AuthResponse {
     required this.role,
     required this.userId,
     required this.fullName,
-    required this.isActive,
+    this.isActive = false,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) =>

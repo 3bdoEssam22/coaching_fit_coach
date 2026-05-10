@@ -1,9 +1,9 @@
+import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
 import 'package:coaching_fit_coach/service_locator.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
         context.go(isActive ? '/view-profile' : '/pending-approval');
       }
     } catch (e) {
-      if (e is DioException && e.response?.statusCode == 404) {
+      if (e is NotFoundFailure) {
         await secureStorage.writeHasProfile(false);
         if (mounted) context.go('/create-profile');
       } else {
