@@ -4,6 +4,8 @@ import 'package:coaching_fit_coach/core/router/app_router.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/auth/data/repositories/auth_repository.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:coaching_fit_coach/features/certificates/data/repositories/certificate_repository.dart';
+import 'package:coaching_fit_coach/features/certificates/presentation/cubit/certificate_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:dio/dio.dart';
@@ -30,8 +32,10 @@ Future<void> init() async {
   // 4. Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
   sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(sl()));
+  sl.registerLazySingleton<CertificateRepository>(() => CertificateRepositoryImpl(sl()));
 
   // 5. Cubits
   sl.registerFactory(() => AuthCubit(sl(), sl<SecureStorage>()));
   sl.registerFactory(() => ProfileCubit(sl()));
+  sl.registerFactory(() => CertificateCubit(sl()));
 }

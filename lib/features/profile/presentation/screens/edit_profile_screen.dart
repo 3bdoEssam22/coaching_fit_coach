@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -83,38 +85,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildAvatar(),
-                  const SizedBox(height: 32),
-                  _buildDisabledGender(),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _bioController,
-                    maxLines: 5,
-                    maxLength: 1000,
-                    decoration: _inputDecoration('Bio'),
-                    style: AppTextStyles.bodyM,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildExperienceStepper(),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: state is ProfileLoading ? null : _saveChanges,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      minimumSize: const Size(double.infinity, 52),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding:
+                EdgeInsets.symmetric(horizontal: responsive.horizontalPadding),
+            child: responsive.content(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildAvatar(),
+                    const SizedBox(height: 32),
+                    _buildDisabledGender(),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _bioController,
+                      maxLines: 5,
+                      maxLength: 1000,
+                      decoration: _inputDecoration('Bio'),
+                      style: AppTextStyles.bodyM,
                     ),
-                    child: state is ProfileLoading
-                        ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                        : Text('Save Changes', style: AppTextStyles.button),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    _buildExperienceStepper(),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: state is ProfileLoading ? null : _saveChanges,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        minimumSize:
+                            Size(double.infinity, responsive.buttonHeight),
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(responsive.cardRadius)),
+                      ),
+                      child: state is ProfileLoading
+                          ? const CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white))
+                          : Text('Save Changes', style: AppTextStyles.button),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           );
@@ -124,6 +136,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildAvatar() {
+    final responsive = ResponsiveHelper(context);
     final profileState = context.read<ProfileCubit>().state;
     String? photoUrl;
     if (profileState is ProfileSuccess) {
@@ -134,13 +147,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Stack(
         children: [
           CircleAvatar(
-            radius: 60,
+            radius: responsive.avatarRadius,
             backgroundColor: AppColors.card,
             backgroundImage: _profileImage != null
                 ? FileImage(_profileImage!)
-                : (photoUrl != null ? NetworkImage(photoUrl) : null) as ImageProvider?,
+                : (photoUrl != null ? NetworkImage(photoUrl) : null)
+                    as ImageProvider?,
             child: _profileImage == null && photoUrl == null
-                ? const Icon(Icons.person, color: AppColors.textHint, size: 60)
+                ? Icon(Icons.person,
+                    color: AppColors.textHint, size: responsive.avatarRadius)
                 : null,
           ),
           Positioned(
@@ -148,10 +163,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             right: 0,
             child: GestureDetector(
               onTap: _pickImage,
-              child: const CircleAvatar(
-                radius: 20,
+              child: CircleAvatar(
+                radius: responsive.avatarRadius * 0.3,
                 backgroundColor: AppColors.primary,
-                child: Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                child: Icon(Icons.camera_alt,
+                    color: Colors.white, size: responsive.avatarRadius * 0.3),
               ),
             ),
           ),
@@ -161,6 +177,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildDisabledGender() {
+    final responsive = ResponsiveHelper(context);
     return Tooltip(
       message: 'Gender cannot be changed',
       child: AbsorbPointer(
@@ -179,7 +196,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
                 color: const Color(0x80162240),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(responsive.cardRadius),
                 border: Border.all(color: AppColors.borderColor),
               ),
               child: Row(
@@ -195,6 +212,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildExperienceStepper() {
+    final responsive = ResponsiveHelper(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,7 +222,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(responsive.cardRadius),
             border: Border.all(color: AppColors.borderColor),
           ),
           child: Row(
@@ -227,13 +245,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   InputDecoration _inputDecoration(String label) {
+    final responsive = ResponsiveHelper(context);
     return InputDecoration(
       labelText: label,
       labelStyle: AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
       filled: true,
       fillColor: AppColors.card,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.borderColor)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primary)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(responsive.cardRadius),
+          borderSide: const BorderSide(color: AppColors.borderColor)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(responsive.cardRadius),
+          borderSide: const BorderSide(color: AppColors.primary)),
       counterStyle: AppTextStyles.bodyS.copyWith(color: AppColors.textHint),
     );
   }

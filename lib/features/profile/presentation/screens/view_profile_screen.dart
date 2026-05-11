@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
@@ -34,6 +35,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -54,16 +56,22 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
           } else if (state is ProfileSuccess) {
             final profile = state.profile;
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  if (!_isActive) _buildPendingBanner(),
-                  _buildHeroCard(profile),
-                  const SizedBox(height: 24),
-                  _buildAboutCard(profile.bio),
-                  const SizedBox(height: 24),
-                  _buildDetailsCard(profile),
-                ],
+              padding: EdgeInsets.symmetric(horizontal: responsive.horizontalPadding),
+              child: responsive.content(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    if (!_isActive) _buildPendingBanner(),
+                    _buildHeroCard(profile),
+                    const SizedBox(height: 24),
+                    _buildAboutCard(profile.bio),
+                    const SizedBox(height: 24),
+                    _buildDetailsCard(profile),
+                    const SizedBox(height: 24),
+                    _buildCertificatesCard(context),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             );
           } else if (state is ProfileFailure) {
@@ -77,12 +85,13 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
   }
 
   Widget _buildPendingBanner() {
+    final responsive = ResponsiveHelper(context);
     return Container(
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: const Color(0x33FFC107),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: Colors.amber),
       ),
       child: Row(
@@ -101,23 +110,28 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
   }
 
   Widget _buildHeroCard(dynamic profile) {
+    final responsive = ResponsiveHelper(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: Column(
         children: [
           CircleAvatar(
-            radius: 50,
+            radius: responsive.avatarRadius,
             backgroundColor: AppColors.primary,
-            backgroundImage: profile.profilePhotoUrl != null ? NetworkImage(profile.profilePhotoUrl!) : null,
+            backgroundImage: profile.profilePhotoUrl != null
+                ? NetworkImage(profile.profilePhotoUrl!)
+                : null,
             child: profile.profilePhotoUrl == null
                 ? Text(
                     _fullName.isNotEmpty ? _fullName[0].toUpperCase() : 'C',
-                    style: AppTextStyles.heading1.copyWith(color: Colors.white),
+                    style: AppTextStyles.heading1.copyWith(
+                        color: Colors.white,
+                        fontSize: responsive.avatarRadius * 0.8),
                   )
                 : null,
           ),
@@ -156,12 +170,13 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
   }
 
   Widget _buildAboutCard(String bio) {
+    final responsive = ResponsiveHelper(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: Column(
@@ -176,11 +191,12 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
   }
 
   Widget _buildDetailsCard(dynamic profile) {
+    final responsive = ResponsiveHelper(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: Column(
@@ -204,6 +220,44 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
         children: [
           Text(label, style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
           Text(value, style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificatesCard(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.workspace_premium_outlined,
+              color: AppColors.primary, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Certificates', style: AppTextStyles.heading3),
+                const SizedBox(height: 2),
+                Text(
+                  'Manage your credentials and certifications.',
+                  style: AppTextStyles.bodyS
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios,
+                color: AppColors.primary, size: 16),
+            onPressed: () => context.push('/certificates'),
+          ),
         ],
       ),
     );

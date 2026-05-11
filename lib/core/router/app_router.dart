@@ -3,6 +3,10 @@ import 'package:coaching_fit_coach/features/auth/presentation/screens/email_conf
 import 'package:coaching_fit_coach/features/auth/presentation/screens/login_screen.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/screens/register_screen.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/screens/splash_screen.dart';
+import 'package:coaching_fit_coach/features/certificates/data/models/certificate_response.dart';
+import 'package:coaching_fit_coach/features/certificates/presentation/screens/certificate_detail_screen.dart';
+import 'package:coaching_fit_coach/features/certificates/presentation/screens/my_certificates_screen.dart';
+import 'package:coaching_fit_coach/features/certificates/presentation/screens/upload_certificate_screen.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/screens/create_profile_screen.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/screens/pending_approval_screen.dart';
@@ -53,6 +57,21 @@ class AppRouter {
       GoRoute(
         path: '/edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/certificates',
+        builder: (context, state) => const MyCertificatesScreen(),
+      ),
+      GoRoute(
+        path: '/certificates/upload',
+        builder: (context, state) => const UploadCertificateScreen(),
+      ),
+      GoRoute(
+        path: '/certificates/:id',
+        builder: (context, state) {
+          final cert = state.extra as CertificateResponse;
+          return CertificateDetailScreen(certificate: cert);
+        },
       ),
     ],
     redirect: (context, state) async {

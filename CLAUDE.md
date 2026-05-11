@@ -20,6 +20,11 @@ json_annotation: ^4.8.1
 google_fonts: ^6.1.0          # Syne (headings) + DM Sans (body)
 image_picker: ^1.0.7
 intl: ^0.19.0
+file_picker: ^8.0.0           # Certificate file selection (pdf/jpg/png/webp)
+flutter_pdfview: ^1.3.2       # In-app PDF viewer for certificates
+url_launcher: ^6.2.5          # Fallback external file opener
+http: ^1.2.1                  # PDF download for pdfview
+path_provider: ^2.1.3         # Temp directory for PDF cache
 
 # dev
 build_runner: ^2.4.8
@@ -50,20 +55,27 @@ lib/
 │   │   └── presentation/
 │   │       ├── cubit/                  — auth_cubit.dart + auth_state.dart
 │   │       └── screens/                — splash, onboarding, login, register, email_confirmation
-│   └── profile/
+│   ├── profile/
+│   │   ├── data/
+│   │   │   ├── models/                 — Coach profile request/response (+ .g.dart)
+│   │   │   └── repositories/profile_repository.dart
+│   │   └── presentation/
+│   │       ├── cubit/
+│   │       └── screens/                — create_profile, view_profile, edit_profile, pending_approval
+│   └── certificates/
 │       ├── data/
-│       │   ├── models/                 — Coach profile request/response (+ .g.dart)
-│       │   └── repositories/profile_repository.dart
+│       │   ├── models/                 — CertificateResponse (+ .g.dart)
+│       │   └── repositories/certificate_repository.dart
 │       └── presentation/
-│           ├── cubit/
-│           └── screens/                — create_profile, view_profile, edit_profile, pending_approval
+│           ├── cubit/                  — certificate_cubit.dart + certificate_state.dart
+│           └── screens/                — my_certificates, upload_certificate, certificate_detail
 ├── main.dart
 └── service_locator.dart                — GetIt registration
 ```
 
 ### State management — BLoC (Cubit)
-- One Cubit per feature: `AuthCubit`, `ProfileCubit`
-- Both provided globally via `MultiBlocProvider` in `main.dart`
+- One Cubit per feature: `AuthCubit`, `ProfileCubit`, `CertificateCubit`
+- All provided globally via `MultiBlocProvider` in `main.dart`
 - Cubits registered as `factory` in GetIt (new instance per provider)
 - States use `Equatable`
 
@@ -256,6 +268,9 @@ Register → Confirm Email → Login → Create Profile → Admin Reviews → Ac
 - ✅ Network layer (Dio + interceptor)
 - ✅ Theme + typography
 - ✅ GoRouter with auth guards
+- ✅ Certificate upload, list, detail, delete (MyCertificatesScreen, UploadCertificateScreen, CertificateDetailScreen)
+- ✅ CertificateCubit + CertificateRepository
+- ✅ PDF in-app viewer (flutter_pdfview) + image viewer
 
 ## What's Not
 - Home/Dashboard (post-activation main screen)

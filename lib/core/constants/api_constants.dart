@@ -11,4 +11,8 @@ class ApiConstants {
   // Coach Profile
   static const String coachProfile = "/api/CoachProfile";
   static const String getMyProfile = "/api/CoachProfile/me";
+
+  // Coach Certificates
+  static const String coachCertificate = "/api/CoachCertificate";
+  static const String myCertificates = "/api/CoachCertificate/me";
 }

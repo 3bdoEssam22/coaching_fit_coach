@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
@@ -32,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocConsumer<AuthCubit, AuthState>(
@@ -71,76 +73,82 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 80),
-                  const Icon(Icons.fitness_center, color: AppColors.primary, size: 64),
-                  const SizedBox(height: 16),
-                  Text('Welcome Back', textAlign: TextAlign.center, style: AppTextStyles.heading2),
-                  const SizedBox(height: 8),
-                  Text('Log in to continue your coaching journey', textAlign: TextAlign.center, style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
-                  const SizedBox(height: 48),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: _inputDecoration('Email'),
-                    validator: (value) => (value?.isEmpty ?? true) ? 'Please enter your email' : null,
-                    style: AppTextStyles.bodyM,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscureText,
-                    decoration: _inputDecoration('Password').copyWith(
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.textHint),
-                        onPressed: () => setState(() => _obscureText = !_obscureText),
+            padding: EdgeInsets.symmetric(horizontal: responsive.horizontalPadding),
+            child: responsive.content(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 80),
+                    const Icon(Icons.fitness_center, color: AppColors.primary, size: 64),
+                    const SizedBox(height: 16),
+                    Text('Welcome Back', textAlign: TextAlign.center, style: AppTextStyles.heading2),
+                    const SizedBox(height: 8),
+                    Text('Log in to continue your coaching journey', textAlign: TextAlign.center, style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+                    const SizedBox(height: 48),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: _inputDecoration('Email'),
+                      validator: (value) => (value?.isEmpty ?? true) ? 'Please enter your email' : null,
+                      style: AppTextStyles.bodyM,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _obscureText,
+                      decoration: _inputDecoration('Password').copyWith(
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.textHint),
+                          onPressed: () => setState(() => _obscureText = !_obscureText),
+                        ),
+                      ),
+                      validator: (value) => (value?.isEmpty ?? true) ? 'Please enter your password' : null,
+                      style: AppTextStyles.bodyM,
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Forgot password feature coming soon.')),
+                          );
+                        },
+                        child: Text('Forgot Password?', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
                       ),
                     ),
-                    validator: (value) => (value?.isEmpty ?? true) ? 'Please enter your password' : null,
-                    style: AppTextStyles.bodyM,
-                  ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Forgot password feature coming soon.')),
-                        );
-                      },
-                      child: Text('Forgot Password?', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: state is AuthLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      minimumSize: const Size(double.infinity, 52),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: state is AuthLoading
-                        ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                        : Text('Login', style: AppTextStyles.button),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Don't have an account? ", style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
-                      TextButton(
-                        onPressed: () => context.go('/register'),
-                        child: Text('Register', style: AppTextStyles.bodyM.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: state is AuthLoading ? null : _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        minimumSize: Size(double.infinity, responsive.buttonHeight),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(responsive.cardRadius),
+                        ),
                       ),
-                    ],
-                  ),
-                ],
+                      child: state is AuthLoading
+                          ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                          : Text('Login', style: AppTextStyles.button),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Don't have an account? ", style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+                        TextButton(
+                          onPressed: () => context.go('/register'),
+                          child: Text('Register', style: AppTextStyles.bodyM.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -150,13 +158,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   InputDecoration _inputDecoration(String label) {
+    final responsive = ResponsiveHelper(context);
     return InputDecoration(
       labelText: label,
       labelStyle: AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
       filled: true,
       fillColor: AppColors.card,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.borderColor)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primary)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
+        borderSide: const BorderSide(color: AppColors.borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
+        borderSide: const BorderSide(color: AppColors.primary),
+      ),
     );
   }
 
