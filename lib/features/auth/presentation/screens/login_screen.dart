@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
@@ -45,12 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
               await sl<SecureStorage>().writeHasProfile(true);
               final isActive = await sl<SecureStorage>().readIsActive();
               if (context.mounted) {
-                context.go(isActive ? '/view-profile' : '/pending-approval');
+                context.goNamed(isActive ? AppRoutes.viewProfile : AppRoutes.pendingApproval);
               }
             } catch (e) {
               if (e is NotFoundFailure) {
                 await sl<SecureStorage>().writeHasProfile(false);
-                if (context.mounted) context.go('/create-profile');
+                if (context.mounted) context.goNamed(AppRoutes.createProfile);
               } else {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text("Don't have an account? ", style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
                         TextButton(
-                          onPressed: () => context.go('/register'),
+                          onPressed: () => context.goNamed(AppRoutes.register),
                           child: Text('Register', style: AppTextStyles.bodyM.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
                         ),
                       ],

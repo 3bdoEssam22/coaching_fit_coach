@@ -6,6 +6,7 @@ import 'package:coaching_fit_coach/features/certificates/presentation/cubit/cert
 import 'package:coaching_fit_coach/features/certificates/presentation/cubit/certificate_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
@@ -38,7 +39,7 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/certificates/upload'),
+        onPressed: () => context.pushNamed(AppRoutes.certificatesUpload),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text('Add Certificate', style: AppTextStyles.bodyS.copyWith(color: Colors.white)),
@@ -126,7 +127,7 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
                 width: double.infinity,
                 height: responsive.buttonHeight,
                 child: ElevatedButton.icon(
-                  onPressed: () => context.push('/certificates/upload'),
+                  onPressed: () => context.pushNamed(AppRoutes.certificatesUpload),
                   icon: const Icon(Icons.add),
                   label: const Text('Add Your First Certificate'),
                   style: ElevatedButton.styleFrom(
@@ -234,7 +235,11 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
           ],
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: () => context.push('/certificates/${cert.id}', extra: cert),
+            onTap: () => context.pushNamed(
+              AppRoutes.certificateDetail,
+              pathParameters: {'id': cert.id},
+              extra: cert,
+            ),
             child: Row(
               children: [
                 Icon(

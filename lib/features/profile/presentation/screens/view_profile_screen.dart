@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
@@ -45,7 +46,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit, color: AppColors.primary),
-            onPressed: () => context.go('/edit-profile'),
+            onPressed: () => context.pushNamed(AppRoutes.editProfile),
           ),
         ],
       ),
@@ -256,7 +257,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios,
                 color: AppColors.primary, size: 16),
-            onPressed: () => context.push('/certificates'),
+            onPressed: () => context.pushNamed(AppRoutes.certificates),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
 import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
@@ -15,7 +16,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _profileRepository.createProfile(request, photo: photo);
       emit(ProfileCreated());
     } catch (e) {
-      emit(ProfileFailure(e.toString()));
+      emit(ProfileFailure((e as Failure).message));
     }
   }
 
@@ -25,7 +26,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       final profile = await _profileRepository.getMyProfile();
       emit(ProfileSuccess(profile));
     } catch (e) {
-      emit(ProfileFailure(e.toString()));
+      emit(ProfileFailure((e as Failure).message));
     }
   }
 
@@ -35,7 +36,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _profileRepository.updateProfile(bio: bio, experienceYears: experienceYears, photo: photo);
       emit(ProfileUpdated());
     } catch (e) {
-      emit(ProfileFailure(e.toString()));
+      emit(ProfileFailure((e as Failure).message));
     }
   }
 }

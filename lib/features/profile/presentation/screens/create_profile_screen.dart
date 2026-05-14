@@ -2,9 +2,11 @@
 
 import 'dart:io';
 
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
@@ -55,7 +57,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           listener: (context, state) {
             if (state is ProfileCreated) {
               sl<SecureStorage>().writeHasProfile(true).then((_) {
-                if (mounted) context.go('/pending-approval');
+                if (mounted) context.goNamed(AppRoutes.pendingApproval);
               });
             } else if (state is ProfileFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -136,7 +138,19 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                                     : Text('Create Profile',
                                         style: AppTextStyles.button),
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () async {
+                                  await context.read<AuthCubit>().logout();
+                                  if (context.mounted) context.goNamed(AppRoutes.login);
+                                },
+                                child: Text(
+                                  'Log Out',
+                                  style: AppTextStyles.bodyM
+                                      .copyWith(color: AppColors.error),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),

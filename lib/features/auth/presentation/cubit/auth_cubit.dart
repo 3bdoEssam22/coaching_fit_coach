@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/auth/data/models/login_request.dart';
 import 'package:coaching_fit_coach/features/auth/data/models/register_request.dart';
@@ -22,7 +23,7 @@ class AuthCubit extends Cubit<AuthState> {
       await _secureStorage.writeFullName(response.fullName);
       emit(AuthSuccess(response));
     } catch (e) {
-      emit(AuthFailure(e.toString()));
+      emit(AuthFailure((e as Failure).message));
     }
   }
 
@@ -32,7 +33,7 @@ class AuthCubit extends Cubit<AuthState> {
       await _authRepository.register(request);
       emit(RegistrationSuccess());
     } catch (e) {
-      emit(AuthFailure(e.toString()));
+      emit(AuthFailure((e as Failure).message));
     }
   }
 

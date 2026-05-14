@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
@@ -47,13 +48,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
+          onPressed: () => context.goNamed(AppRoutes.login),
         ),
       ),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is RegistrationSuccess) {
-            context.go('/email-confirmation', extra: _emailController.text.trim());
+            context.goNamed(AppRoutes.emailConfirmation, extra: _emailController.text.trim());
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -175,7 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Text("Already have an account? ", style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
                         TextButton(
-                          onPressed: () => context.go('/login'),
+                          onPressed: () => context.goNamed(AppRoutes.login),
                           child: Text('Log in', style: AppTextStyles.bodyM.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
                         ),
                       ],

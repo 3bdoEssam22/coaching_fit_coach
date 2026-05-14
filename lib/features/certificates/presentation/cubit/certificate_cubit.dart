@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/features/certificates/data/repositories/certificate_repository.dart';
 import 'package:coaching_fit_coach/features/certificates/presentation/cubit/certificate_state.dart';
 
@@ -14,7 +15,7 @@ class CertificateCubit extends Cubit<CertificateState> {
       final certs = await _repository.getMyCertificates();
       emit(CertificateLoaded(certs));
     } catch (e) {
-      emit(CertificateError(e.toString()));
+      emit(CertificateError((e as Failure).message));
     }
   }
 
@@ -34,7 +35,7 @@ class CertificateCubit extends Cubit<CertificateState> {
       );
       emit(CertificateUploadSuccess(cert));
     } catch (e) {
-      emit(CertificateUploadError(e.toString()));
+      emit(CertificateUploadError((e as Failure).message));
     }
   }
 
@@ -44,7 +45,7 @@ class CertificateCubit extends Cubit<CertificateState> {
       await _repository.delete(id);
       emit(CertificateDeleteSuccess());
     } catch (e) {
-      emit(CertificateDeleteError(e.toString()));
+      emit(CertificateDeleteError((e as Failure).message));
     }
   }
 }

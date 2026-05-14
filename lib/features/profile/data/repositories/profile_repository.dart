@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:coaching_fit_coach/core/constants/api_constants.dart';
+import 'package:coaching_fit_coach/core/errors/dio_error_handler.dart';
 import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/network/dio_client.dart';
 import 'package:coaching_fit_coach/features/profile/data/models/coach_profile_response.dart';
@@ -19,28 +20,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   ProfileRepositoryImpl(this._dioClient);
 
-  String _dioFailureMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is Map && data['message'] is String) return data['message'] as String;
-    if (data is String && data.isNotEmpty) return data;
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        return 'Connection timed out. Check that the backend is running.';
-      case DioExceptionType.connectionError:
-        return 'Cannot reach the server at ${e.requestOptions.baseUrl}. Is the gateway running?';
-      case DioExceptionType.badCertificate:
-        return 'Bad SSL certificate.';
-      case DioExceptionType.cancel:
-        return 'Request was cancelled.';
-      case DioExceptionType.badResponse:
-        return 'Server returned ${e.response?.statusCode}.';
-      case DioExceptionType.unknown:
-        return e.message ?? 'Network error: ${e.error}';
-    }
-  }
-
   @override
   Future<void> createProfile(CreateCoachProfileRequest request, {File? photo}) async {
     try {
@@ -52,7 +31,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       });
       await _dioClient.dio.post(ApiConstants.coachProfile, data: formData);
     } on DioException catch (e) {
-      throw ServerFailure(_dioFailureMessage(e));
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -65,7 +44,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       if (e.response?.statusCode == 404) {
         throw const NotFoundFailure('Profile not found');
       }
-      throw ServerFailure(_dioFailureMessage(e));
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -77,7 +56,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final response = await _dioClient.dio.get('${ApiConstants.coachProfile}/$id');
       return CoachProfileResponse.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw ServerFailure(_dioFailureMessage(e));
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -91,7 +70,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       });
       await _dioClient.dio.put(ApiConstants.coachProfile, data: formData);
     } on DioException catch (e) {
-      throw ServerFailure(_dioFailureMessage(e));
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 }

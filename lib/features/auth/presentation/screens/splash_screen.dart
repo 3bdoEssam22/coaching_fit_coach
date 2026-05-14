@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
@@ -28,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (token == null) {
       await Future.delayed(const Duration(seconds: 2));
       if (mounted) {
-        context.go('/onboarding');
+        context.goNamed(AppRoutes.onboarding);
       }
       return;
     }
@@ -40,15 +41,15 @@ class _SplashScreenState extends State<SplashScreen> {
       await secureStorage.writeHasProfile(true);
       final isActive = await secureStorage.readIsActive();
       if (mounted) {
-        context.go(isActive ? '/view-profile' : '/pending-approval');
+        context.goNamed(isActive ? AppRoutes.viewProfile : AppRoutes.pendingApproval);
       }
     } catch (e) {
       if (e is NotFoundFailure) {
         await secureStorage.writeHasProfile(false);
-        if (mounted) context.go('/create-profile');
+        if (mounted) context.goNamed(AppRoutes.createProfile);
       } else {
         await secureStorage.clearAll();
-        if (mounted) context.go('/login');
+        if (mounted) context.goNamed(AppRoutes.login);
       }
     }
   }
