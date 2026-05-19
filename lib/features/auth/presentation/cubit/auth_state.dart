@@ -1,5 +1,12 @@
-import 'package:coaching_fit_coach/features/auth/data/models/auth_response.dart';
 import 'package:equatable/equatable.dart';
+
+enum AuthNextStep {
+  onboarding,
+  login,
+  createProfile,
+  pendingApproval,
+  viewProfile,
+}
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -13,12 +20,12 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthSuccess extends AuthState {
-  final AuthResponse authResponse;
+  final AuthNextStep nextStep;
 
-  const AuthSuccess(this.authResponse);
+  const AuthSuccess(this.nextStep);
 
   @override
-  List<Object?> get props => [authResponse];
+  List<Object?> get props => [nextStep];
 }
 
 class AuthFailure extends AuthState {

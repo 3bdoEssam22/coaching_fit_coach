@@ -3,14 +3,11 @@
 import 'dart:io';
 
 import 'package:coaching_fit_coach/core/routing/app_routes.dart';
-import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
-import 'package:coaching_fit_coach/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -56,9 +53,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         body: BlocConsumer<ProfileCubit, ProfileState>(
           listener: (context, state) {
             if (state is ProfileCreated) {
-              sl<SecureStorage>().writeHasProfile(true).then((_) {
-                if (mounted) context.goNamed(AppRoutes.pendingApproval);
-              });
+              if (mounted) context.goNamed(AppRoutes.pendingApproval);
             } else if (state is ProfileFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -250,12 +245,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
   void _createProfile() {
     if (_formKey.currentState!.validate() && _gender != null) {
-      final request = CreateCoachProfileRequest(
+      context.read<ProfileCubit>().createProfile(
         gender: _gender!,
         bio: _bioController.text.trim(),
         experienceYears: _experienceYears,
+        photo: _profileImage,
       );
-      context.read<ProfileCubit>().createProfile(request, photo: _profileImage);
     } else if (_gender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -1,19 +1,31 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:coaching_fit_coach/core/errors/failures.dart';
-import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
+import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepository _profileRepository;
+  final SecureStorage _secureStorage;
 
-  ProfileCubit(this._profileRepository) : super(ProfileInitial());
+  ProfileCubit(this._profileRepository, this._secureStorage) : super(ProfileInitial());
 
-  Future<void> createProfile(CreateCoachProfileRequest request, {File? photo}) async {
+  Future<void> createProfile({
+    required String gender,
+    required String bio,
+    required int experienceYears,
+    File? photo,
+  }) async {
     emit(ProfileLoading());
     try {
-      await _profileRepository.createProfile(request, photo: photo);
+      await _profileRepository.createProfile(
+        gender: gender,
+        bio: bio,
+        experienceYears: experienceYears,
+        photo: photo,
+      );
+      await _secureStorage.writeHasProfile(true);
       emit(ProfileCreated());
     } catch (e) {
       emit(ProfileFailure((e as Failure).message));
@@ -24,7 +36,9 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileLoading());
     try {
       final profile = await _profileRepository.getMyProfile();
-      emit(ProfileSuccess(profile));
+      final fullName = await _secureStorage.readFullName() ?? 'Coach';
+      final isActive = await _secureStorage.readIsActive();
+      emit(ProfileSuccess(profile, fullName: fullName, isActive: isActive));
     } catch (e) {
       emit(ProfileFailure((e as Failure).message));
     }
@@ -33,7 +47,11 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> updateProfile({String? bio, int? experienceYears, File? photo}) async {
     emit(ProfileLoading());
     try {
-      await _profileRepository.updateProfile(bio: bio, experienceYears: experienceYears, photo: photo);
+      await _profileRepository.updateProfile(
+        bio: bio,
+        experienceYears: experienceYears,
+        photo: photo,
+      );
       emit(ProfileUpdated());
     } catch (e) {
       emit(ProfileFailure((e as Failure).message));

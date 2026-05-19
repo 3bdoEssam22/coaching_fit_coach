@@ -1,4 +1,4 @@
-import 'package:coaching_fit_coach/features/certificates/data/models/certificate_response.dart';
+import 'package:coaching_fit_coach/features/certificates/domain/entities/certificate.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class CertificateState extends Equatable {
@@ -13,7 +13,7 @@ class CertificateInitial extends CertificateState {}
 class CertificateLoading extends CertificateState {}
 
 class CertificateLoaded extends CertificateState {
-  final List<CertificateResponse> certificates;
+  final List<Certificate> certificates;
   const CertificateLoaded(this.certificates);
 
   @override
@@ -31,7 +31,7 @@ class CertificateError extends CertificateState {
 class CertificateUploading extends CertificateState {}
 
 class CertificateUploadSuccess extends CertificateState {
-  final CertificateResponse certificate;
+  final Certificate certificate;
   const CertificateUploadSuccess(this.certificate);
 
   @override

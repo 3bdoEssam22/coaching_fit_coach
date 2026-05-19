@@ -1,11 +1,10 @@
 import 'package:coaching_fit_coach/core/routing/app_routes.dart';
-import 'package:coaching_fit_coach/core/errors/failures.dart';
-import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
-import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
-import 'package:coaching_fit_coach/service_locator.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,71 +18,61 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuthStatus();
+    _bootstrap();
   }
 
-  Future<void> _checkAuthStatus() async {
-    final secureStorage = sl<SecureStorage>();
-    final token = await secureStorage.readToken();
-
-    if (token == null) {
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted) {
-        context.goNamed(AppRoutes.onboarding);
-      }
-      return;
-    }
-
-    // Token exists, check profile
-    final profileRepository = sl<ProfileRepository>();
-    try {
-      await profileRepository.getMyProfile();
-      await secureStorage.writeHasProfile(true);
-      final isActive = await secureStorage.readIsActive();
-      if (mounted) {
-        context.goNamed(isActive ? AppRoutes.viewProfile : AppRoutes.pendingApproval);
-      }
-    } catch (e) {
-      if (e is NotFoundFailure) {
-        await secureStorage.writeHasProfile(false);
-        if (mounted) context.goNamed(AppRoutes.createProfile);
-      } else {
-        await secureStorage.clearAll();
-        if (mounted) context.goNamed(AppRoutes.login);
-      }
-    }
+  Future<void> _bootstrap() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    await context.read<AuthCubit>().resolveSession();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.fitness_center,
-              color: AppColors.primary,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'CoachingFit',
-              style: AppTextStyles.heading1,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Train · Inspire · Earn',
-              style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 48),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
-          ],
+    return BlocListener<AuthCubit, AuthState>(
+      listenWhen: (_, next) => next is AuthSuccess,
+      listener: (context, state) {
+        if (state is AuthSuccess) {
+          context.goNamed(_routeFor(state.nextStep));
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.fitness_center,
+                color: AppColors.primary,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'CoachingFit',
+                style: AppTextStyles.heading1,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Train · Inspire · Earn',
+                style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 48),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  String _routeFor(AuthNextStep step) => switch (step) {
+        AuthNextStep.onboarding => AppRoutes.onboarding,
+        AuthNextStep.login => AppRoutes.login,
+        AuthNextStep.createProfile => AppRoutes.createProfile,
+        AuthNextStep.pendingApproval => AppRoutes.pendingApproval,
+        AuthNextStep.viewProfile => AppRoutes.viewProfile,
+      };
 }

@@ -35,7 +35,11 @@ Future<void> init() async {
   sl.registerLazySingleton<CertificateRepository>(() => CertificateRepositoryImpl(sl()));
 
   // 5. Cubits
-  sl.registerFactory(() => AuthCubit(sl(), sl<SecureStorage>()));
-  sl.registerFactory(() => ProfileCubit(sl()));
+  sl.registerFactory(() => AuthCubit(
+        sl<AuthRepository>(),
+        sl<ProfileRepository>(),
+        sl<SecureStorage>(),
+      ));
+  sl.registerFactory(() => ProfileCubit(sl(), sl<SecureStorage>()));
   sl.registerFactory(() => CertificateCubit(sl()));
 }

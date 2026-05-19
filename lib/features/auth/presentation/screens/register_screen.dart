@@ -2,7 +2,6 @@ import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
-import 'package:coaching_fit_coach/features/auth/data/models/register_request.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -211,15 +210,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _register() {
     if (_formKey.currentState!.validate()) {
-      final request = RegisterRequest(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        email: _emailController.text.trim(),
-        phoneNumber: _phoneController.text.trim(),
-        password: _passwordController.text.trim(),
-        confirmPassword: _confirmPasswordController.text.trim(),
-      );
-      context.read<AuthCubit>().register(request);
+      context.read<AuthCubit>().register(
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
+            email: _emailController.text.trim(),
+            phoneNumber: _phoneController.text.trim(),
+            password: _passwordController.text.trim(),
+            confirmPassword: _confirmPasswordController.text.trim(),
+          );
     }
   }
 }

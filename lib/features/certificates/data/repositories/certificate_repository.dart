@@ -4,11 +4,12 @@ import 'package:coaching_fit_coach/core/errors/dio_error_handler.dart';
 import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/network/dio_client.dart';
 import 'package:coaching_fit_coach/features/certificates/data/models/certificate_response.dart';
+import 'package:coaching_fit_coach/features/certificates/domain/entities/certificate.dart';
 import 'package:dio/dio.dart';
 
 abstract class CertificateRepository {
-  Future<List<CertificateResponse>> getMyCertificates();
-  Future<CertificateResponse> upload({
+  Future<List<Certificate>> getMyCertificates();
+  Future<Certificate> upload({
     required String title,
     required String issuingOrganization,
     required DateTime issuedDate,
@@ -22,14 +23,29 @@ class CertificateRepositoryImpl implements CertificateRepository {
 
   CertificateRepositoryImpl(this._dioClient);
 
+  Certificate _toEntity(CertificateResponse r) => Certificate(
+        id: r.id,
+        coachProfileId: r.coachProfileId,
+        title: r.title,
+        issuingOrganization: r.issuingOrganization,
+        issuedDate: r.issuedDate,
+        fileUrl: r.fileUrl,
+        fileName: r.fileName,
+        fileType: r.fileType,
+        status: r.status,
+        rejectionReason: r.rejectionReason,
+        reviewedAt: r.reviewedAt,
+        createdAt: r.createdAt,
+      );
+
   @override
-  Future<List<CertificateResponse>> getMyCertificates() async {
+  Future<List<Certificate>> getMyCertificates() async {
     try {
       final response = await _dioClient.dio.get(ApiConstants.myCertificates);
       final raw = response.data['data'];
       final data = raw is List ? raw : <dynamic>[];
       return data
-          .map((e) => CertificateResponse.fromJson(e as Map<String, dynamic>))
+          .map((e) => _toEntity(CertificateResponse.fromJson(e as Map<String, dynamic>)))
           .toList();
     } on DioException catch (e) {
       throw ServerFailure(dioFailureMessage(e));
@@ -37,7 +53,7 @@ class CertificateRepositoryImpl implements CertificateRepository {
   }
 
   @override
-  Future<CertificateResponse> upload({
+  Future<Certificate> upload({
     required String title,
     required String issuingOrganization,
     required DateTime issuedDate,
@@ -54,7 +70,7 @@ class CertificateRepositoryImpl implements CertificateRepository {
         ApiConstants.coachCertificate,
         data: formData,
       );
-      return CertificateResponse.fromJson(response.data['data']);
+      return _toEntity(CertificateResponse.fromJson(response.data['data']));
     } on DioException catch (e) {
       throw ServerFailure(dioFailureMessage(e));
     }

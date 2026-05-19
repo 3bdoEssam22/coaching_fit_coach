@@ -1,7 +1,7 @@
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
-import 'package:coaching_fit_coach/features/certificates/data/models/certificate_response.dart';
+import 'package:coaching_fit_coach/features/certificates/domain/entities/certificate.dart';
 import 'package:coaching_fit_coach/features/certificates/presentation/cubit/certificate_cubit.dart';
 import 'package:coaching_fit_coach/features/certificates/presentation/cubit/certificate_state.dart';
 import 'package:flutter/material.dart';
@@ -86,13 +86,34 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
               color: AppColors.primary,
               onRefresh: () =>
                   context.read<CertificateCubit>().loadCertificates(),
-              child: ListView.separated(
-                padding: EdgeInsets.fromLTRB(responsive.horizontalPadding, 16,
-                    responsive.horizontalPadding, 100),
-                itemCount: state.certificates.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) =>
-                    _buildCertCard(context, state.certificates[index], responsive),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final padding = EdgeInsets.fromLTRB(
+                      responsive.horizontalPadding, 16,
+                      responsive.horizontalPadding, 100);
+                  if (ResponsiveHelper.isWide(constraints)) {
+                    return GridView.builder(
+                      padding: padding,
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 480,
+                        mainAxisExtent: 230,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                      ),
+                      itemCount: state.certificates.length,
+                      itemBuilder: (context, index) => _buildCertCard(
+                          context, state.certificates[index], responsive),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: padding,
+                    itemCount: state.certificates.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) => _buildCertCard(
+                        context, state.certificates[index], responsive),
+                  );
+                },
               ),
             );
           }
@@ -111,7 +132,7 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.workspace_premium_outlined,
+              const Icon(Icons.workspace_premium_outlined,
                   size: 72, color: AppColors.textHint),
               const SizedBox(height: 20),
               Text('No Certificates Yet', style: AppTextStyles.heading3),
@@ -145,7 +166,7 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
     );
   }
 
-  Widget _buildCertCard(BuildContext context, CertificateResponse cert,
+  Widget _buildCertCard(BuildContext context, Certificate cert,
       ResponsiveHelper responsive) {
     final statusColor = _statusColor(cert.status);
     final statusIcon = _statusIcon(cert.status);
@@ -181,7 +202,7 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textHint),
+              const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textHint),
               const SizedBox(width: 4),
               Text(
                 DateFormat.yMMMMd().format(cert.issuedDate),
@@ -263,7 +284,7 @@ class _MyCertificatesScreenState extends State<MyCertificatesScreen> {
     );
   }
 
-  void _confirmDelete(BuildContext context, CertificateResponse cert) {
+  void _confirmDelete(BuildContext context, Certificate cert) {
     final responsive = ResponsiveHelper(context);
     showDialog(
       context: context,

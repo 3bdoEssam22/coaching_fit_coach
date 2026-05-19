@@ -13,6 +13,7 @@ abstract class AuthRepository {
   Future<void> getMe();
   Future<void> confirmEmail(String userId, String token);
   Future<void> resendConfirmation(String email);
+  Future<void> revoke(String refreshToken);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -66,6 +67,18 @@ class AuthRepositoryImpl implements AuthRepository {
       await _dioClient.dio.post(
         ApiConstants.resendConfirmation,
         queryParameters: {'email': email},
+      );
+    } on DioException catch (e) {
+      throw ServerFailure(dioFailureMessage(e));
+    }
+  }
+
+  @override
+  Future<void> revoke(String refreshToken) async {
+    try {
+      await _dioClient.dio.post(
+        ApiConstants.revoke,
+        data: {'refreshToken': refreshToken},
       );
     } on DioException catch (e) {
       throw ServerFailure(dioFailureMessage(e));

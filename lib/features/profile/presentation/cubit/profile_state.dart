@@ -1,4 +1,4 @@
-import 'package:coaching_fit_coach/features/profile/data/models/coach_profile_response.dart';
+import 'package:coaching_fit_coach/features/profile/domain/entities/coach_profile.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class ProfileState extends Equatable {
@@ -13,10 +13,14 @@ class ProfileInitial extends ProfileState {}
 class ProfileLoading extends ProfileState {}
 
 class ProfileSuccess extends ProfileState {
-  final CoachProfileResponse profile;
-  const ProfileSuccess(this.profile);
+  final CoachProfile profile;
+  final String fullName;
+  final bool isActive;
+
+  const ProfileSuccess(this.profile, {required this.fullName, required this.isActive});
+
   @override
-  List<Object?> get props => [profile];
+  List<Object?> get props => [profile, fullName, isActive];
 }
 
 class ProfileFailure extends ProfileState {

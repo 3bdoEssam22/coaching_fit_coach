@@ -2,15 +2,11 @@ import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
-import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_state.dart';
-import 'package:coaching_fit_coach/features/profile/data/repositories/profile_repository.dart';
-import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:coaching_fit_coach/service_locator.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,31 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) async {
+        listener: (context, state) {
           if (state is AuthSuccess) {
-            final profileRepository = sl<ProfileRepository>();
-            try {
-              await profileRepository.getMyProfile();
-              await sl<SecureStorage>().writeHasProfile(true);
-              final isActive = await sl<SecureStorage>().readIsActive();
-              if (context.mounted) {
-                context.goNamed(isActive ? AppRoutes.viewProfile : AppRoutes.pendingApproval);
-              }
-            } catch (e) {
-              if (e is NotFoundFailure) {
-                await sl<SecureStorage>().writeHasProfile(false);
-                if (context.mounted) context.goNamed(AppRoutes.createProfile);
-              } else {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Could not load profile. Please try again.'),
-                      backgroundColor: AppColors.error,
-                    ),
-                  );
-                }
-              }
-            }
+            context.goNamed(_routeFor(state.nextStep));
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -91,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 48),
                     TextFormField(
                       controller: _emailController,
-                      decoration: _inputDecoration('Email'),
+                      decoration: _inputDecoration('Email', responsive),
                       validator: (value) => (value?.isEmpty ?? true) ? 'Please enter your email' : null,
                       style: AppTextStyles.bodyM,
                       keyboardType: TextInputType.emailAddress,
@@ -100,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscureText,
-                      decoration: _inputDecoration('Password').copyWith(
+                      decoration: _inputDecoration('Password', responsive).copyWith(
                         suffixIcon: IconButton(
                           icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.textHint),
                           onPressed: () => setState(() => _obscureText = !_obscureText),
@@ -158,8 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String label) {
-    final responsive = ResponsiveHelper(context);
+  InputDecoration _inputDecoration(String label, ResponsiveHelper responsive) {
     return InputDecoration(
       labelText: label,
       labelStyle: AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
@@ -175,6 +148,14 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  String _routeFor(AuthNextStep step) => switch (step) {
+        AuthNextStep.onboarding => AppRoutes.onboarding,
+        AuthNextStep.login => AppRoutes.login,
+        AuthNextStep.createProfile => AppRoutes.createProfile,
+        AuthNextStep.pendingApproval => AppRoutes.pendingApproval,
+        AuthNextStep.viewProfile => AppRoutes.viewProfile,
+      };
 
   void _login() {
     if (_formKey.currentState!.validate()) {

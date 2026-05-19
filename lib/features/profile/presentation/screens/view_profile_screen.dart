@@ -2,14 +2,14 @@ import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/features/profile/domain/entities/coach_profile.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
-import 'package:coaching_fit_coach/service_locator.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 
 class ViewProfileScreen extends StatefulWidget {
   const ViewProfileScreen({super.key});
@@ -19,19 +19,10 @@ class ViewProfileScreen extends StatefulWidget {
 }
 
 class _ViewProfileScreenState extends State<ViewProfileScreen> {
-  String _fullName = 'Coach';
-  bool _isActive = true;
-
   @override
   void initState() {
     super.initState();
     context.read<ProfileCubit>().getMyProfile();
-    sl<SecureStorage>().readFullName().then((name) {
-      if (mounted) setState(() => _fullName = name ?? 'Coach');
-    });
-    sl<SecureStorage>().readIsActive().then((isActive) {
-      if (mounted) setState(() => _isActive = isActive);
-    });
   }
 
   @override
@@ -48,6 +39,10 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             icon: const Icon(Icons.edit, color: AppColors.primary),
             onPressed: () => context.pushNamed(AppRoutes.editProfile),
           ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+            onPressed: () => _confirmLogout(context),
+          ),
         ],
       ),
       body: BlocBuilder<ProfileCubit, ProfileState>(
@@ -56,20 +51,22 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary)));
           } else if (state is ProfileSuccess) {
             final profile = state.profile;
+            final fullName = state.fullName;
+            final isActive = state.isActive;
             return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: responsive.horizontalPadding),
               child: responsive.content(
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
-                    if (!_isActive) _buildPendingBanner(),
-                    _buildHeroCard(profile),
+                    if (!isActive) _buildPendingBanner(responsive),
+                    _buildHeroCard(profile, fullName, responsive),
                     const SizedBox(height: 24),
-                    _buildAboutCard(profile.bio),
+                    _buildAboutCard(profile.bio, responsive),
                     const SizedBox(height: 24),
-                    _buildDetailsCard(profile),
+                    _buildDetailsCard(profile, responsive),
                     const SizedBox(height: 24),
-                    _buildCertificatesCard(context),
+                    _buildCertificatesCard(context, responsive),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -85,8 +82,35 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildPendingBanner() {
-    final responsive = ResponsiveHelper(context);
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: Text('Log Out', style: AppTextStyles.heading3),
+        content: Text(
+          'You\'ll need to sign in again to access your account.',
+          style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel', style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Log Out', style: AppTextStyles.bodyM.copyWith(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await context.read<AuthCubit>().logout();
+      if (context.mounted) context.go('/login');
+    }
+  }
+
+  Widget _buildPendingBanner(ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 16),
@@ -110,8 +134,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildHeroCard(dynamic profile) {
-    final responsive = ResponsiveHelper(context);
+  Widget _buildHeroCard(CoachProfile profile, String fullName, ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -129,7 +152,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 : null,
             child: profile.profilePhotoUrl == null
                 ? Text(
-                    _fullName.isNotEmpty ? _fullName[0].toUpperCase() : 'C',
+                    fullName.isNotEmpty ? fullName[0].toUpperCase() : 'C',
                     style: AppTextStyles.heading1.copyWith(
                         color: Colors.white,
                         fontSize: responsive.avatarRadius * 0.8),
@@ -137,7 +160,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 : null,
           ),
           const SizedBox(height: 16),
-          Text(_fullName, style: AppTextStyles.heading2),
+          Text(fullName, style: AppTextStyles.heading2),
           const SizedBox(height: 8),
           Chip(
             label: Text('Coach', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
@@ -170,8 +193,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildAboutCard(String bio) {
-    final responsive = ResponsiveHelper(context);
+  Widget _buildAboutCard(String bio, ResponsiveHelper responsive) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -191,8 +213,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildDetailsCard(dynamic profile) {
-    final responsive = ResponsiveHelper(context);
+  Widget _buildDetailsCard(CoachProfile profile, ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -226,8 +247,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildCertificatesCard(BuildContext context) {
-    final responsive = ResponsiveHelper(context);
+  Widget _buildCertificatesCard(BuildContext context, ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -248,8 +268,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 const SizedBox(height: 2),
                 Text(
                   'Manage your credentials and certifications.',
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.bodyS.copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -263,5 +282,4 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
       ),
     );
   }
-
 }
