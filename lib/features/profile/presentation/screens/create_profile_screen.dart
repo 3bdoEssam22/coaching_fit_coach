@@ -2,17 +2,17 @@
 
 import 'dart:io';
 
-import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
-import 'package:coaching_fit_coach/features/profile/data/models/create_coach_profile_request.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
-import 'package:coaching_fit_coach/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   const CreateProfileScreen({super.key});
@@ -45,6 +45,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -52,9 +53,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         body: BlocConsumer<ProfileCubit, ProfileState>(
           listener: (context, state) {
             if (state is ProfileCreated) {
-              sl<SecureStorage>().writeHasProfile(true).then((_) {
-                if (mounted) context.go('/pending-approval');
-              });
+              if (mounted) context.goNamed(AppRoutes.pendingApproval);
             } else if (state is ProfileFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -71,53 +70,84 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                   const LinearProgressIndicator(value: 0.5, backgroundColor: AppColors.card, valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary)),
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text('Set Up Your Profile', style: AppTextStyles.heading2),
-                            const SizedBox(height: 32),
-                            Center(
-                              child: GestureDetector(
-                                onTap: _pickImage,
-                                child: CircleAvatar(
-                                  radius: 60,
-                                  backgroundColor: AppColors.card,
-                                  backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
-                                  child: _profileImage == null
-                                      ? const Icon(Icons.camera_alt, color: AppColors.textHint, size: 40)
-                                      : null,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: responsive.horizontalPadding),
+                      child: responsive.content(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 16),
+                              Text('Set Up Your Profile',
+                                  style: AppTextStyles.heading2),
+                              const SizedBox(height: 32),
+                              Center(
+                                child: GestureDetector(
+                                  onTap: _pickImage,
+                                  child: CircleAvatar(
+                                    radius: responsive.avatarRadius,
+                                    backgroundColor: AppColors.card,
+                                    backgroundImage: _profileImage != null
+                                        ? FileImage(_profileImage!)
+                                        : null,
+                                    child: _profileImage == null
+                                        ? Icon(Icons.camera_alt,
+                                            color: AppColors.textHint,
+                                            size: responsive.avatarRadius * 0.6)
+                                        : null,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 32),
-                            _buildGenderToggle(),
-                            const SizedBox(height: 20),
-                            TextFormField(
-                              controller: _bioController,
-                              maxLines: 5,
-                              maxLength: 1000,
-                              decoration: _inputDecoration('Bio'),
-                              validator: (value) => (value?.isEmpty ?? true) ? 'Please enter your bio' : null,
-                              style: AppTextStyles.bodyM,
-                            ),
-                            const SizedBox(height: 20),
-                            _buildExperienceStepper(),
-                            const SizedBox(height: 32),
-                            ElevatedButton(
-                              onPressed: state is ProfileLoading ? null : _createProfile,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                minimumSize: const Size(double.infinity, 52),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              const SizedBox(height: 32),
+                              _buildGenderToggle(responsive),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                controller: _bioController,
+                                maxLines: 5,
+                                maxLength: 1000,
+                                decoration: _inputDecoration('Bio', responsive),
+                                validator: (value) => (value?.isEmpty ?? true)
+                                    ? 'Please enter your bio'
+                                    : null,
+                                style: AppTextStyles.bodyM,
                               ),
-                              child: state is ProfileLoading
-                                  ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                                  : Text('Create Profile', style: AppTextStyles.button),
-                            ),
-                          ],
+                              const SizedBox(height: 20),
+                              _buildExperienceStepper(responsive),
+                              const SizedBox(height: 32),
+                              ElevatedButton(
+                                onPressed:
+                                    state is ProfileLoading ? null : _createProfile,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  minimumSize: Size(
+                                      double.infinity, responsive.buttonHeight),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          responsive.cardRadius)),
+                                ),
+                                child: state is ProfileLoading
+                                    ? const CircularProgressIndicator(
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                            Colors.white))
+                                    : Text('Create Profile',
+                                        style: AppTextStyles.button),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () async {
+                                  await context.read<AuthCubit>().logout();
+                                  if (context.mounted) context.goNamed(AppRoutes.login);
+                                },
+                                child: Text(
+                                  'Log Out',
+                                  style: AppTextStyles.bodyM
+                                      .copyWith(color: AppColors.error),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -131,7 +161,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  Widget _buildGenderToggle() {
+  Widget _buildGenderToggle(ResponsiveHelper responsive) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -139,30 +169,33 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _genderButton('Male')),
+            Expanded(child: _genderButton('Male', responsive)),
             const SizedBox(width: 16),
-            Expanded(child: _genderButton('Female')),
+            Expanded(child: _genderButton('Female', responsive)),
           ],
         ),
       ],
     );
   }
 
-  Widget _genderButton(String gender) {
+  Widget _genderButton(String gender, ResponsiveHelper responsive) {
     final isSelected = _gender == gender;
     return ElevatedButton(
       onPressed: () => setState(() => _gender = gender),
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? AppColors.primary : AppColors.card,
         side: isSelected ? null : const BorderSide(color: AppColors.borderColor),
-        minimumSize: const Size(double.infinity, 52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        minimumSize: Size(double.infinity, responsive.buttonHeight),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(responsive.cardRadius)),
       ),
-      child: Text(gender, style: AppTextStyles.bodyM.copyWith(color: isSelected ? Colors.white : AppColors.textPrimary)),
+      child: Text(gender,
+          style: AppTextStyles.bodyM
+              .copyWith(color: isSelected ? Colors.white : AppColors.textPrimary)),
     );
   }
 
-  Widget _buildExperienceStepper() {
+  Widget _buildExperienceStepper(ResponsiveHelper responsive) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -172,7 +205,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(responsive.cardRadius),
             border: Border.all(color: AppColors.borderColor),
           ),
           child: Row(
@@ -194,26 +227,30 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String label) {
+  InputDecoration _inputDecoration(String label, ResponsiveHelper responsive) {
     return InputDecoration(
       labelText: label,
       labelStyle: AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
       filled: true,
       fillColor: AppColors.card,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.borderColor)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primary)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(responsive.cardRadius),
+          borderSide: const BorderSide(color: AppColors.borderColor)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(responsive.cardRadius),
+          borderSide: const BorderSide(color: AppColors.primary)),
       counterStyle: AppTextStyles.bodyS.copyWith(color: AppColors.textHint),
     );
   }
 
   void _createProfile() {
     if (_formKey.currentState!.validate() && _gender != null) {
-      final request = CreateCoachProfileRequest(
+      context.read<ProfileCubit>().createProfile(
         gender: _gender!,
         bio: _bioController.text.trim(),
         experienceYears: _experienceYears,
+        photo: _profileImage,
       );
-      context.read<ProfileCubit>().createProfile(request, photo: _profileImage);
     } else if (_gender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

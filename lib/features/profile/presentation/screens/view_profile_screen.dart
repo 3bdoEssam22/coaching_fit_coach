@@ -1,13 +1,15 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
+import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/features/profile/domain/entities/coach_profile.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:coaching_fit_coach/core/storage/secure_storage.dart';
-import 'package:coaching_fit_coach/service_locator.dart';
+import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 
 class ViewProfileScreen extends StatefulWidget {
   const ViewProfileScreen({super.key});
@@ -17,23 +19,15 @@ class ViewProfileScreen extends StatefulWidget {
 }
 
 class _ViewProfileScreenState extends State<ViewProfileScreen> {
-  String _fullName = 'Coach';
-  bool _isActive = true;
-
   @override
   void initState() {
     super.initState();
     context.read<ProfileCubit>().getMyProfile();
-    sl<SecureStorage>().readFullName().then((name) {
-      if (mounted) setState(() => _fullName = name ?? 'Coach');
-    });
-    sl<SecureStorage>().readIsActive().then((isActive) {
-      if (mounted) setState(() => _isActive = isActive);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -43,7 +37,11 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit, color: AppColors.primary),
-            onPressed: () => context.go('/edit-profile'),
+            onPressed: () => context.pushNamed(AppRoutes.editProfile),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+            onPressed: () => _confirmLogout(context),
           ),
         ],
       ),
@@ -53,17 +51,25 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
             return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary)));
           } else if (state is ProfileSuccess) {
             final profile = state.profile;
+            final fullName = state.fullName;
+            final isActive = state.isActive;
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  if (!_isActive) _buildPendingBanner(),
-                  _buildHeroCard(profile),
-                  const SizedBox(height: 24),
-                  _buildAboutCard(profile.bio),
-                  const SizedBox(height: 24),
-                  _buildDetailsCard(profile),
-                ],
+              padding: EdgeInsets.symmetric(horizontal: responsive.horizontalPadding),
+              child: responsive.content(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    if (!isActive) _buildPendingBanner(responsive),
+                    _buildHeroCard(profile, fullName, responsive),
+                    const SizedBox(height: 24),
+                    _buildAboutCard(profile.bio, responsive),
+                    const SizedBox(height: 24),
+                    _buildDetailsCard(profile, responsive),
+                    const SizedBox(height: 24),
+                    _buildCertificatesCard(context, responsive),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             );
           } else if (state is ProfileFailure) {
@@ -76,13 +82,41 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildPendingBanner() {
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: Text('Log Out', style: AppTextStyles.heading3),
+        content: Text(
+          'You\'ll need to sign in again to access your account.',
+          style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel', style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Log Out', style: AppTextStyles.bodyM.copyWith(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await context.read<AuthCubit>().logout();
+      if (context.mounted) context.go('/login');
+    }
+  }
+
+  Widget _buildPendingBanner(ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: const Color(0x33FFC107),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: Colors.amber),
       ),
       child: Row(
@@ -100,29 +134,33 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildHeroCard(dynamic profile) {
+  Widget _buildHeroCard(CoachProfile profile, String fullName, ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: Column(
         children: [
           CircleAvatar(
-            radius: 50,
+            radius: responsive.avatarRadius,
             backgroundColor: AppColors.primary,
-            backgroundImage: profile.profilePhotoUrl != null ? NetworkImage(profile.profilePhotoUrl!) : null,
+            backgroundImage: profile.profilePhotoUrl != null
+                ? NetworkImage(profile.profilePhotoUrl!)
+                : null,
             child: profile.profilePhotoUrl == null
                 ? Text(
-                    _fullName.isNotEmpty ? _fullName[0].toUpperCase() : 'C',
-                    style: AppTextStyles.heading1.copyWith(color: Colors.white),
+                    fullName.isNotEmpty ? fullName[0].toUpperCase() : 'C',
+                    style: AppTextStyles.heading1.copyWith(
+                        color: Colors.white,
+                        fontSize: responsive.avatarRadius * 0.8),
                   )
                 : null,
           ),
           const SizedBox(height: 16),
-          Text(_fullName, style: AppTextStyles.heading2),
+          Text(fullName, style: AppTextStyles.heading2),
           const SizedBox(height: 8),
           Chip(
             label: Text('Coach', style: AppTextStyles.bodyS.copyWith(color: AppColors.primary)),
@@ -155,13 +193,13 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildAboutCard(String bio) {
+  Widget _buildAboutCard(String bio, ResponsiveHelper responsive) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: Column(
@@ -175,12 +213,12 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  Widget _buildDetailsCard(dynamic profile) {
+  Widget _buildDetailsCard(CoachProfile profile, ResponsiveHelper responsive) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: Column(
@@ -209,4 +247,39 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
+  Widget _buildCertificatesCard(BuildContext context, ResponsiveHelper responsive) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.workspace_premium_outlined,
+              color: AppColors.primary, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Certificates', style: AppTextStyles.heading3),
+                const SizedBox(height: 2),
+                Text(
+                  'Manage your credentials and certifications.',
+                  style: AppTextStyles.bodyS.copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios,
+                color: AppColors.primary, size: 16),
+            onPressed: () => context.pushNamed(AppRoutes.certificates),
+          ),
+        ],
+      ),
+    );
+  }
 }

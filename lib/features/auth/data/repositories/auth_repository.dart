@@ -1,4 +1,5 @@
 import 'package:coaching_fit_coach/core/constants/api_constants.dart';
+import 'package:coaching_fit_coach/core/errors/dio_error_handler.dart';
 import 'package:coaching_fit_coach/core/errors/failures.dart';
 import 'package:coaching_fit_coach/core/network/dio_client.dart';
 import 'package:coaching_fit_coach/features/auth/data/models/auth_response.dart';
@@ -12,6 +13,7 @@ abstract class AuthRepository {
   Future<void> getMe();
   Future<void> confirmEmail(String userId, String token);
   Future<void> resendConfirmation(String email);
+  Future<void> revoke(String refreshToken);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -24,7 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _dioClient.dio.post(ApiConstants.registerCoach, data: request.toJson());
     } on DioException catch (e) {
-      throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -34,7 +36,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _dioClient.dio.post(ApiConstants.login, data: request.toJson());
       return AuthResponse.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -43,7 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _dioClient.dio.get(ApiConstants.getMe);
     } on DioException catch (e) {
-      throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -55,7 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
         queryParameters: {'userId': userId, 'token': token},
       );
     } on DioException catch (e) {
-      throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 
@@ -67,7 +69,19 @@ class AuthRepositoryImpl implements AuthRepository {
         queryParameters: {'email': email},
       );
     } on DioException catch (e) {
-      throw ServerFailure(e.response?.data['message'] ?? 'An error occurred');
+      throw ServerFailure(dioFailureMessage(e));
+    }
+  }
+
+  @override
+  Future<void> revoke(String refreshToken) async {
+    try {
+      await _dioClient.dio.post(
+        ApiConstants.revoke,
+        data: {'refreshToken': refreshToken},
+      );
+    } on DioException catch (e) {
+      throw ServerFailure(dioFailureMessage(e));
     }
   }
 }

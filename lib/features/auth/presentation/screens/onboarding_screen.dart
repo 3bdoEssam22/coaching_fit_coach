@@ -1,3 +1,4 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: () => context.go('/register'),
+                onPressed: () => context.goNamed(AppRoutes.register),
                 child: Text(
                   'Skip',
                   style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
@@ -73,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   if (_currentPage == _pages.length - 1) {
-                    context.go('/register');
+                    context.goNamed(AppRoutes.register);
                   } else {
                     _pageController.nextPage(
                       duration: const Duration(milliseconds: 400),

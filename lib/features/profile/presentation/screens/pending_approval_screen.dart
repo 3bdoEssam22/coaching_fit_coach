@@ -1,5 +1,7 @@
+import 'package:coaching_fit_coach/core/routing/app_routes.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/core/theme/text_styles.dart';
+import 'package:coaching_fit_coach/core/widgets/responsive_helper.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,70 +12,144 @@ class PendingApprovalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return PopScope(
       canPop: false,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.borderColor, width: 2),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                    horizontal: responsive.horizontalPadding, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+                  child: IntrinsicHeight(
+                    child: responsive.content(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Spacer(flex: 2),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: AppColors.card,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: AppColors.borderColor, width: 2),
+                              ),
+                              child: Icon(Icons.hourglass_top_rounded,
+                                  color: AppColors.primary,
+                                  size: responsive.screenWidth * 0.18),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text('Profile Under Review',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.heading2),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Your profile has been submitted for review. This process usually takes 24-48 hours. We will notify you once it is approved.',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.bodyM
+                                .copyWith(color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: 32),
+                          _buildStatusTracker(context),
+                          const SizedBox(height: 16),
+                          _buildCertificatesAction(context),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () => context.goNamed(AppRoutes.viewProfile),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              minimumSize:
+                                  Size(double.infinity, responsive.buttonHeight),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      responsive.cardRadius)),
+                            ),
+                            child:
+                                Text('Check My Status', style: AppTextStyles.button),
+                          ),
+                          const SizedBox(height: 4),
+                          TextButton(
+                            onPressed: () async {
+                              await context.read<AuthCubit>().logout();
+                              if (context.mounted) context.goNamed(AppRoutes.login);
+                            },
+                            child: Text(
+                              'Log Out',
+                              style: AppTextStyles.bodyM
+                                  .copyWith(color: AppColors.error),
+                            ),
+                          ),
+                          const Spacer(),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                child: const Icon(Icons.hourglass_top_rounded, color: AppColors.primary, size: 80),
-              ),
-              const SizedBox(height: 32),
-              Text('Profile Under Review', textAlign: TextAlign.center, style: AppTextStyles.heading2),
-              const SizedBox(height: 16),
-              Text(
-                'Your profile has been submitted for review. This process usually takes 24-48 hours. We will notify you once it is approved.',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 48),
-              _buildStatusTracker(),
-              const SizedBox(height: 48),
-              ElevatedButton(
-                onPressed: () => context.go('/view-profile'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text('Check My Status', style: AppTextStyles.button),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () async {
-                  await context.read<AuthCubit>().logout();
-                  if (context.mounted) context.go('/login');
-                },
-                child: Text(
-                  'Log Out',
-                  style: AppTextStyles.bodyM.copyWith(color: AppColors.error),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStatusTracker() {
+  Widget _buildCertificatesAction(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
+        border: Border.all(color: AppColors.primary.withAlpha(80)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.workspace_premium_outlined,
+              color: AppColors.primary, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Upload Certificates',
+                    style: AppTextStyles.bodyL
+                        .copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text(
+                  'Speed up your approval by uploading your credentials.',
+                  style: AppTextStyles.bodyS
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => context.pushNamed(AppRoutes.certificates),
+            child: Text('Add',
+                style: AppTextStyles.bodyM
+                    .copyWith(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusTracker(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(responsive.cardRadius),
         border: Border.all(color: AppColors.borderColor),
       ),
       child: const Column(
@@ -130,7 +206,7 @@ class _StatusStepState extends State<StatusStep> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
           if (widget.isActive)

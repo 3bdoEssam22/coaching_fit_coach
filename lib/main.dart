@@ -1,6 +1,7 @@
 import 'package:coaching_fit_coach/core/router/app_router.dart';
 import 'package:coaching_fit_coach/core/theme/app_theme.dart';
 import 'package:coaching_fit_coach/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:coaching_fit_coach/features/certificates/presentation/cubit/certificate_cubit.dart';
 import 'package:coaching_fit_coach/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:coaching_fit_coach/service_locator.dart' as di;
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => sl<AuthCubit>()),
         BlocProvider(create: (context) => sl<ProfileCubit>()),
+        BlocProvider(create: (context) => sl<CertificateCubit>()),
       ],
       child: MaterialApp.router(
         title: 'CoachingFit Coach',
