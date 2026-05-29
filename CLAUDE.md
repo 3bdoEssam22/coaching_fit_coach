@@ -3,7 +3,7 @@
 ## What This Is
 The **coach-facing** Flutter app for CoachingFit, a commission-based fitness marketplace (Uber/Uber Driver model). Coaches register, get admin-approved, build a profile, and eventually manage plan requests, chat, and earnings.
 
-This is the developer's first production Flutter project. The backend (Identity + Gateway + User services) is already complete. The Trainee app and Admin dashboard come later.
+This is the developer's first production Flutter project. The backend (Identity + Gateway + User services) is complete and the Admin Dashboard (Blazor Server, separate repo) ships the coach approval / reject / deactivate flows. The Trainee app is next.
 
 ---
 
